@@ -1,13 +1,13 @@
 import type { BudgetLevel, CompanyTag, EnergyLevel, LocationTag, Mood, RejectionReason, TimeBudget } from '../types';
 
-export const MOOD_OPTIONS: { value: Mood; label: string; emoji: string }[] = [
-  { value: 'new', label: 'Что-то новое', emoji: '✨' },
-  { value: 'cozy', label: 'Уют', emoji: '🫖' },
-  { value: 'romance', label: 'Романтика', emoji: '❤️' },
-  { value: 'creative', label: 'Творчество', emoji: '🎨' },
-  { value: 'fun', label: 'Весело', emoji: '😂' },
-  { value: 'adventure', label: 'Приключение', emoji: '🌆' },
-  { value: 'nostalgia', label: 'Ностальгия', emoji: '🧸' },
+export const MOOD_OPTIONS: { value: Mood; label: string; emoji: string; tint: string }[] = [
+  { value: 'new', label: 'Что-то новое', emoji: '✨', tint: '#f3ddc9' },
+  { value: 'cozy', label: 'Уют', emoji: '🫖', tint: '#e9dcb8' },
+  { value: 'romance', label: 'Романтика', emoji: '❤️', tint: '#f0d3d1' },
+  { value: 'creative', label: 'Творчество', emoji: '🎨', tint: '#ddd3e6' },
+  { value: 'fun', label: 'Весело', emoji: '😂', tint: '#f5ddb3' },
+  { value: 'adventure', label: 'Приключение', emoji: '🌆', tint: '#cddac9' },
+  { value: 'nostalgia', label: 'Ностальгия', emoji: '🧸', tint: '#e3d2c3' },
 ];
 
 export const TIME_OPTIONS: { value: TimeBudget; label: string }[] = [
@@ -54,6 +54,35 @@ export const REJECTION_REASON_OPTIONS: { value: RejectionReason; label: string }
   { value: 'not-my-thing', label: 'Это не моё' },
   { value: 'already-done-similar', label: 'Уже похожее делала' },
 ];
+
+const CATEGORY_LABEL: Record<string, string> = {
+  adventure: 'приключения',
+  art: 'творчество',
+  connection: 'близость',
+  conversation: 'разговоры',
+  cozy: 'уют',
+  creative: 'творчество',
+  culture: 'культура',
+  discovery: 'открытия',
+  food: 'еда',
+  home: 'дом',
+  memory: 'память',
+  movement: 'движение',
+  music: 'музыка',
+  nature: 'природа',
+  nostalgia: 'ностальгия',
+  photography: 'фото',
+  randomness: 'случайность',
+  reading: 'книги',
+  ritual: 'ритуалы',
+  romance: 'романтика',
+  seasonal: 'сезон',
+  writing: 'письмо',
+};
+
+export function formatCategory(category: string): string {
+  return CATEGORY_LABEL[category] ?? category;
+}
 
 export function formatDuration(min: number, max: number): string {
   if (max >= 300) {

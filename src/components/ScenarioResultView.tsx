@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { RejectionReason, Scenario } from '../types';
 import { ScenarioCard } from './ScenarioCard';
 import { REJECTION_REASON_OPTIONS } from '../lib/options';
+import { shareScenarioCard } from '../lib/shareCard';
 
 interface Props {
   scenario: Scenario;
@@ -14,10 +15,26 @@ interface Props {
 
 export function ScenarioResultView({ scenario, saved, onAccept, onNotToday, onToggleSaved, onClose }: Props) {
   const [showReasons, setShowReasons] = useState(false);
+  const [sharing, setSharing] = useState(false);
+
+  async function handleShare() {
+    if (sharing) return;
+    setSharing(true);
+    try {
+      await shareScenarioCard(scenario);
+    } catch {
+      // user cancelled share sheet or the browser blocked it — nothing to recover from here
+    } finally {
+      setSharing(false);
+    }
+  }
 
   return (
     <div className="scenario-view">
       <div className="scenario-view__close">
+        <button className="top-bar__icon-btn" onClick={handleShare} aria-label="Поделиться" disabled={sharing}>
+          ⇪
+        </button>
         <button className="top-bar__icon-btn" onClick={onClose} aria-label="Закрыть">
           ✕
         </button>
@@ -63,7 +80,7 @@ export function ScenarioResultView({ scenario, saved, onAccept, onNotToday, onTo
                 setShowReasons(false);
               }}
             >
-              Пропустить, дай другой вариант
+              Без причины, просто другой вариант
             </button>
           </div>
         )}

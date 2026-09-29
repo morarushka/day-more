@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import scenariosData from './data/scenarios.json';
 import type { Mood, MomentRating, RejectionReason, Scenario, UserContextSelection } from './types';
 import { useApp } from './hooks/useApp';
+import { useScenarios } from './hooks/useScenarios';
 import { selectScenario } from './lib/selectScenario';
 import { scenariosInCollection } from './lib/collections';
 import { resetAllData } from './lib/db';
@@ -18,10 +18,9 @@ import { Moments } from './components/Moments';
 import { Settings } from './components/Settings';
 import { BottomNav, type Tab } from './components/BottomNav';
 
-const scenarios = scenariosData as Scenario[];
-
 export default function App() {
   const app = useApp();
+  const scenarios = useScenarios();
   const [tab, setTab] = useState<Tab>('today');
 
   const [pendingMood, setPendingMood] = useState<Mood | undefined>(undefined);
@@ -30,6 +29,7 @@ export default function App() {
   const [resultScenario, setResultScenario] = useState<Scenario | null>(null);
   const [resultPool, setResultPool] = useState<Scenario[] | undefined>(undefined);
   const [resultMood, setResultMood] = useState<Mood | undefined>(undefined);
+  const [resultUseContext, setResultUseContext] = useState(true);
 
   const [viewingActive, setViewingActive] = useState(false);
   const [showCompleteFlow, setShowCompleteFlow] = useState(false);
@@ -42,21 +42,25 @@ export default function App() {
   );
 
   const activeScenario = useMemo(
-    () => scenarios.find((s) => s.id === app.state?.activeScenarioId) ?? null,
-    [app.state?.activeScenarioId],
+    () => scenarios?.find((s) => s.id === app.state?.activeScenarioId) ?? null,
+    [scenarios, app.state?.activeScenarioId],
   );
 
   const savedScenarios = useMemo(
-    () => (app.state?.savedScenarioIds ?? []).map((id) => scenarios.find((s) => s.id === id)).filter((s): s is Scenario => !!s),
-    [app.state?.savedScenarioIds],
+    () =>
+      (app.state?.savedScenarioIds ?? [])
+        .map((id) => scenarios?.find((s) => s.id === id))
+        .filter((s): s is Scenario => !!s),
+    [scenarios, app.state?.savedScenarioIds],
   );
 
-  if (!app.state) return null;
+  if (!app.state || !scenarios) return null;
+  const allScenarios = scenarios;
 
-  function rollScenario(mood: Mood | undefined, pool: Scenario[] | undefined, excludeId?: string) {
-    const scenario = selectScenario(scenarios, app.state!.events, {
+  function rollScenario(mood: Mood | undefined, pool: Scenario[] | undefined, excludeId?: string, useContext = true) {
+    const scenario = selectScenario(allScenarios, app.state!.events, {
       mood,
-      context: app.state!.context,
+      context: useContext ? app.state!.context : undefined,
       pool,
       excludeId,
     });
@@ -65,12 +69,17 @@ export default function App() {
       setResultScenario(scenario);
       setResultPool(pool);
       setResultMood(mood);
+      setResultUseContext(useContext);
     }
   }
 
-  function handlePickMood(mood: Mood | undefined) {
+  function handlePickMood(mood: Mood) {
     setPendingMood(mood);
     setShowContextSheet(true);
+  }
+
+  function handleSurprise() {
+    rollScenario(undefined, undefined, undefined, false);
   }
 
   function handleConfirmContext(context: UserContextSelection) {
@@ -80,7 +89,7 @@ export default function App() {
   }
 
   function handleChooseForMe(collectionId: string) {
-    const pool = scenariosInCollection(collectionId, scenarios);
+    const pool = scenariosInCollection(collectionId, allScenarios);
     rollScenario(undefined, pool);
   }
 
@@ -89,6 +98,7 @@ export default function App() {
     setResultScenario(scenario);
     setResultPool(pool);
     setResultMood(undefined);
+    setResultUseContext(true);
   }
 
   function handleAccept() {
@@ -102,7 +112,7 @@ export default function App() {
   function handleNotToday(reason?: RejectionReason) {
     if (!resultScenario) return;
     app.rejectScenario(resultScenario.id, reason);
-    rollScenario(resultMood, resultPool, resultScenario.id);
+    rollScenario(resultMood, resultPool, resultScenario.id, resultUseContext);
   }
 
   function handleSaveComplete(rating: MomentRating, note: string | null, photo: Blob | null) {
@@ -120,6 +130,7 @@ export default function App() {
         <Today
           activeScenario={activeScenario}
           onPickMood={handlePickMood}
+          onSurprise={handleSurprise}
           onOpenActive={() => setViewingActive(true)}
           onOpenSettings={() => setShowSettings(true)}
         />
@@ -127,7 +138,7 @@ export default function App() {
 
       {tab === 'collections' && !openCollectionId && (
         <Collections
-          scenarios={scenarios}
+          scenarios={allScenarios}
           completedScenarioIds={completedScenarioIds}
           onOpenCollection={setOpenCollectionId}
         />
@@ -136,10 +147,10 @@ export default function App() {
       {openCollectionId && (
         <CollectionDetail
           collectionId={openCollectionId}
-          scenarios={scenarios}
+          scenarios={allScenarios}
           completedScenarioIds={completedScenarioIds}
           onChooseForMe={() => handleChooseForMe(openCollectionId)}
-          onOpenScenario={(s) => handleOpenScenarioManually(s, scenariosInCollection(openCollectionId, scenarios))}
+          onOpenScenario={(s) => handleOpenScenarioManually(s, scenariosInCollection(openCollectionId, allScenarios))}
           onBack={() => setOpenCollectionId(null)}
         />
       )}

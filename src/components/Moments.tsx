@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { Moment, Scenario } from '../types';
 import { groupMomentsByMonth, monthStatsLine } from '../lib/moments';
 import { usePhotoUrl } from '../hooks/usePhotoUrl';
+import { YearRecap } from './YearRecap';
 
 interface Props {
   moments: Moment[];
@@ -29,11 +31,25 @@ function MomentTile({ moment }: { moment: Moment }) {
 
 export function Moments({ moments, savedScenarios, onOpenSaved }: Props) {
   const monthGroups = groupMomentsByMonth(moments);
+  const [showYearRecap, setShowYearRecap] = useState(false);
 
   return (
     <div className="screen">
-      <p className="eyebrow">Моменты</p>
-      <h1 className="display-title">Дни, которые ты действительно запомнишь.</h1>
+      <div className="top-bar">
+        <div>
+          <p className="eyebrow">Моменты</p>
+          <h1 className="display-title">Дни, которые ты действительно запомнишь.</h1>
+        </div>
+      </div>
+
+      {moments.length > 0 && (
+        <button className="year-recap-banner" onClick={() => setShowYearRecap(true)}>
+          <span className="year-recap-banner__eyebrow">Год в моментах</span>
+          <span className="year-recap-banner__title">Посмотреть, сколько всего было</span>
+        </button>
+      )}
+
+      {showYearRecap && <YearRecap moments={moments} onClose={() => setShowYearRecap(false)} />}
 
       {savedScenarios.length > 0 && (
         <div className="saved-list">

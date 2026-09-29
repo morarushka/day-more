@@ -1,14 +1,16 @@
+import type { CSSProperties } from 'react';
 import type { Mood, Scenario } from '../types';
 import { MOOD_OPTIONS } from '../lib/options';
 
 interface Props {
   activeScenario: Scenario | null;
-  onPickMood: (mood: Mood | undefined) => void;
+  onPickMood: (mood: Mood) => void;
+  onSurprise: () => void;
   onOpenActive: () => void;
   onOpenSettings: () => void;
 }
 
-export function Today({ activeScenario, onPickMood, onOpenActive, onOpenSettings }: Props) {
+export function Today({ activeScenario, onPickMood, onSurprise, onOpenActive, onOpenSettings }: Props) {
   return (
     <div className="screen">
       <div className="top-bar">
@@ -31,7 +33,7 @@ export function Today({ activeScenario, onPickMood, onOpenActive, onOpenSettings
         </div>
       )}
 
-      <button className="surprise-btn" onClick={() => onPickMood(undefined)}>
+      <button className="surprise-btn" onClick={onSurprise}>
         <span className="surprise-btn__emoji">🎲</span>
         <span className="surprise-btn__label">Удиви меня</span>
       </button>
@@ -39,7 +41,9 @@ export function Today({ activeScenario, onPickMood, onOpenActive, onOpenSettings
       <div className="mood-grid">
         {MOOD_OPTIONS.map((m) => (
           <button key={m.value} className="mood-chip" onClick={() => onPickMood(m.value)}>
-            <span className="mood-chip__emoji">{m.emoji}</span>
+            <span className="mood-chip__icon" style={{ '--mood-tint': m.tint } as CSSProperties}>
+              {m.emoji}
+            </span>
             <span className="mood-chip__label">{m.label}</span>
           </button>
         ))}
