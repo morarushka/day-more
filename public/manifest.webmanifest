@@ -1,0 +1,15 @@
+{
+  "name": "Маленькие планы",
+  "short_name": "Маленькие планы",
+  "description": "Небольшие сценарии для обычной жизни",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f0e4",
+  "theme_color": "#f6f0e4",
+  "lang": "ru",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
